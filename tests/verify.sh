@@ -41,7 +41,9 @@ trap cleanup EXIT
 mkdir -p "$TEMP_HOME/lib"
 cp "$ROOT_DIR/init.zsh" "$TEMP_HOME/init.zsh"
 cp "$ROOT_DIR/lib/runtime.zsh" "$TEMP_HOME/lib/runtime.zsh"
+cp "$ROOT_DIR/lib/git.zsh" "$TEMP_HOME/lib/git.zsh"
 cp "$ROOT_DIR/lib/update.zsh" "$TEMP_HOME/lib/update.zsh"
+cp "$ROOT_DIR/lib/upgrade.zsh" "$TEMP_HOME/lib/upgrade.zsh"
 
 if ! zsh -c "export ZPLUX_HOME=\"$TEMP_HOME\"; source \"$TEMP_HOME/init.zsh\"" >/tmp/zplux_verify_out 2>/tmp/zplux_verify_err; then
   fail "init.zsh should still load when completions directory is missing"

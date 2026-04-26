@@ -16,7 +16,9 @@ Startup stays local-only. No network sync runs during shell init.
 
 - `init.zsh` - thin entrypoint sourced from `.zshrc`
 - `lib/runtime.zsh` - startup-only runtime (`fpath`, `compinit`, cache build)
-- `lib/update.zsh` - git subtree update workflow and guards
+- `lib/git.zsh` - shared git helpers for maintenance commands
+- `lib/update.zsh` - completions update workflow
+- `lib/upgrade.zsh` - self-upgrade workflow
 - `bin/zplux-update` - standalone completions updater
 - `bin/zplux-upgrade` - standalone self-upgrade entrypoint
 - `completions/` - mirrored upstream completion files
@@ -44,7 +46,7 @@ source "$ZPLUX_HOME/init.zsh"
 When sourced, `init.zsh`:
 
 1. Validates `ZPLUX_HOME`
-2. Loads `lib/runtime.zsh` and `lib/update.zsh`
+2. Loads runtime and maintenance libraries from `lib/`
 3. Exposes `zplux-update` and `zplux-upgrade`
 4. Runs `zplux_init`
 
@@ -79,8 +81,9 @@ Update flow:
 1. Ensures `git` exists and repo is in a valid/clean state
 2. Fetches upstream `zsh-completions/master`
 3. Resolves upstream `src` tree and compares with tracked local `completions` tree when available
-4. Exports upstream `src` into a temporary directory and atomically replaces local `completions/`
-5. Cleans temporary artifacts and invalidates local compdump cache files
+4. Uses a local cache stamp for upstream tree idempotency when `completions/` is not git-tracked
+5. Exports upstream `src` into a temporary directory and atomically replaces local `completions/`
+6. Cleans temporary artifacts and invalidates local compdump cache files
 
 If `completions/` is missing during startup, zplux prints a warning and suggests running `zplux-update`.
 

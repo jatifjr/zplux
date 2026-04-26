@@ -8,5 +8,6 @@ typeset -g _zplux_comp_dir="${_zplux_root}/completions"
 typeset -g _zplux_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zplux"
 typeset -g _zplux_compdump="${_zplux_cache}/.zcompdump"
 
+source "${_zplux_root}/lib/git.zsh"
 source "${_zplux_root}/lib/update.zsh"
 _zplux_update_run "$@"
