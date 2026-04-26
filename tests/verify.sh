@@ -33,4 +33,22 @@ if ! zsh -c "export ZPLUX_HOME=\"$ROOT_DIR\"; source \"$ROOT_DIR/init.zsh\"; whe
 fi
 pass "public update and upgrade commands are exposed"
 
+TEMP_HOME="$(mktemp -d)"
+cleanup() {
+  rm -rf "$TEMP_HOME"
+}
+trap cleanup EXIT
+mkdir -p "$TEMP_HOME/lib"
+cp "$ROOT_DIR/init.zsh" "$TEMP_HOME/init.zsh"
+cp "$ROOT_DIR/lib/runtime.zsh" "$TEMP_HOME/lib/runtime.zsh"
+cp "$ROOT_DIR/lib/update.zsh" "$TEMP_HOME/lib/update.zsh"
+
+if ! zsh -c "export ZPLUX_HOME=\"$TEMP_HOME\"; source \"$TEMP_HOME/init.zsh\"" >/tmp/zplux_verify_out 2>/tmp/zplux_verify_err; then
+  fail "init.zsh should still load when completions directory is missing"
+fi
+if ! grep -q "please run zplux-update and restart your shell" /tmp/zplux_verify_err; then
+  fail "missing expected completions warning"
+fi
+pass "init.zsh warns when completions directory is missing"
+
 printf "All checks passed (%d).\n" "$PASS_COUNT"

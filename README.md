@@ -83,6 +83,8 @@ Update flow:
 5. Runs subtree pull only when there is a change
 6. Invalidates local compdump cache files
 
+If `completions/` is missing during startup, zplux prints a warning and suggests running `zplux-update`.
+
 ## Upgrading zplux itself
 
 To force-sync this cloned repository to `origin/main`, run:
@@ -127,5 +129,6 @@ Current checks cover:
 - expected failure when `ZPLUX_HOME` is missing
 - successful load with `ZPLUX_HOME` set
 - `zplux-update` and `zplux-upgrade` command exposure
+- startup warning when `completions/` is missing
 
 If your repo does not track `completions/` yet (for example, clean clone with `completions/` excluded), running `zplux-update` will initialize it automatically.

@@ -102,6 +102,7 @@ _zplux_upgrade_run() {
   }
 
   print "zplux-upgrade: synced repository to ${remote_ref}"
+  print "zplux-upgrade: upgrade completed, please restart your shell"
 }
 
 _zplux_update_run() {
@@ -143,7 +144,7 @@ _zplux_update_run() {
   fi
 
   if [[ -n "${local_tree}" && "${upstream_tree}" == "${local_tree}" ]]; then
-    print "zplux-update: completions already up to date"
+    print "zplux-update: already up to date"
     return 0
   fi
 
@@ -165,8 +166,8 @@ _zplux_update_run() {
 
   rm -f "${_zplux_compdump}" "${_zplux_compdump}.zwc"
   if [[ "${subtree_action}" == "add" ]]; then
-    print "zplux-update: bootstrapped completions and invalidated compdump cache"
+    print "zplux-update: update completed, please restart your shell"
   else
-    print "zplux-update: synced completions and invalidated compdump cache"
+    print "zplux-update: update completed, please restart your shell"
   fi
 }

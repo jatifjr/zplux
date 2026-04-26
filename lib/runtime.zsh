@@ -12,6 +12,11 @@ zplux_build() {
 }
 
 zplux_init() {
+  [[ -d "${_zplux_comp_dir}" ]] || {
+    print -u2 "zplux: please run zplux-update and restart your shell"
+    return 0
+  }
+
   typeset -gaU fpath
   fpath=("${_zplux_comp_dir}" "${fpath[@]}")
 
