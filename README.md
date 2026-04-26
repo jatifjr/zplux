@@ -78,10 +78,9 @@ Update flow:
 
 1. Ensures `git` exists and repo is in a valid/clean state
 2. Fetches upstream `zsh-completions/master`
-3. Bootstraps `completions/` with subtree **add** when missing from git history
-4. Otherwise compares upstream `src` tree to local `completions/`
-5. Runs subtree pull only when there is a change
-6. Invalidates local compdump cache files
+3. Resolves upstream `src` tree and compares with tracked local `completions` tree when available
+4. Exports upstream `src` into a temporary directory and atomically replaces local `completions/`
+5. Cleans temporary artifacts and invalidates local compdump cache files
 
 If `completions/` is missing during startup, zplux prints a warning and suggests running `zplux-update`.
 
