@@ -1,8 +1,13 @@
 #!/usr/bin/env zsh
-# Note: sourced by init.zsh or bin/zplux-update
+# Note: sourced by init.zsh, bin/zplux-update, or bin/zplux-upgrade
 
 _zplux_update_fail() {
   print -u2 "zplux-update: $1"
+  return 1
+}
+
+_zplux_upgrade_fail() {
+  print -u2 "zplux-upgrade: $1"
   return 1
 }
 
@@ -50,6 +55,53 @@ _zplux_ensure_remote() {
 _zplux_has_committed_completions_tree() {
   local repo_dir="$1"
   _zplux_git_quiet "${repo_dir}" rev-parse --verify HEAD:completions
+}
+
+_zplux_upgrade_run() {
+  local repo_dir="${_zplux_root}"
+  local remote_name="origin"
+  local remote_ref="${remote_name}/main"
+
+  command -v git >/dev/null 2>&1 || {
+    _zplux_upgrade_fail "git is required"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" rev-parse --is-inside-work-tree || {
+    _zplux_upgrade_fail "'${repo_dir}' is not a git repository"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" rev-parse --verify HEAD || {
+    _zplux_upgrade_fail "repository has no commits yet"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" remote get-url "${remote_name}" || {
+    _zplux_upgrade_fail "remote '${remote_name}' is required"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" fetch "${remote_name}" main --quiet || {
+    _zplux_upgrade_fail "failed to fetch ${remote_ref}"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" rev-parse --verify "${remote_ref}" || {
+    _zplux_upgrade_fail "remote ref '${remote_ref}' is unavailable"
+    return 1
+  }
+
+  print "zplux-upgrade: force syncing to ${remote_ref} (local changes will be discarded)"
+  _zplux_git_quiet "${repo_dir}" checkout -B main "${remote_ref}" || {
+    _zplux_upgrade_fail "failed to checkout local main from ${remote_ref}"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" reset --hard "${remote_ref}" || {
+    _zplux_upgrade_fail "failed to hard reset to ${remote_ref}"
+    return 1
+  }
+  _zplux_git_quiet "${repo_dir}" clean -fd || {
+    _zplux_upgrade_fail "failed to clean untracked files"
+    return 1
+  }
+
+  print "zplux-upgrade: synced repository to ${remote_ref}"
 }
 
 _zplux_update_run() {

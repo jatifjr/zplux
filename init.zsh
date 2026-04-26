@@ -21,5 +21,6 @@ source "${_zplux_root}/lib/update.zsh"
 
 # Public command surface uses kebab-case consistently.
 eval 'zplux-update() { _zplux_update_run "$@"; }'
+eval 'zplux-upgrade() { _zplux_upgrade_run "$@"; }'
 
 zplux_init

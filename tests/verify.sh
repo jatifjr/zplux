@@ -28,9 +28,9 @@ if ! zsh -c "export ZPLUX_HOME=\"$ROOT_DIR\"; source \"$ROOT_DIR/init.zsh\"" >/t
 fi
 pass "init.zsh loads with ZPLUX_HOME"
 
-if ! zsh -c "export ZPLUX_HOME=\"$ROOT_DIR\"; source \"$ROOT_DIR/init.zsh\"; whence -w zplux-update | grep -q 'function'" >/tmp/zplux_verify_out 2>/tmp/zplux_verify_err; then
-  fail "expected zplux-update function"
+if ! zsh -c "export ZPLUX_HOME=\"$ROOT_DIR\"; source \"$ROOT_DIR/init.zsh\"; whence -w zplux-update | grep -q 'function'; whence -w zplux-upgrade | grep -q 'function'" >/tmp/zplux_verify_out 2>/tmp/zplux_verify_err; then
+  fail "expected zplux-update and zplux-upgrade functions"
 fi
-pass "public update command is exposed"
+pass "public update and upgrade commands are exposed"
 
 printf "All checks passed (%d).\n" "$PASS_COUNT"
