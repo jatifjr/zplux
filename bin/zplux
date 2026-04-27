@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+typeset -g ZPLUX_HOME="${ZPLUX_HOME:-${0:A:h:h}}"
+source "${ZPLUX_HOME}/lib/core/env.zsh"
+source "${ZPLUX_HOME}/lib/core/usage.zsh"
+source "${ZPLUX_HOME}/lib/core/dispatch.zsh"
+_zplux_dispatch "$@"

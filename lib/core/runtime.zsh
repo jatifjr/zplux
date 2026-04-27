@@ -6,7 +6,7 @@ zplux_init() {
   local compiled_file="${source_file}.zwc"
 
   [[ -d "${_zplux_comp_dir}" ]] || {
-    print -u2 "zplux: please run zplux-update and restart your shell"
+    print -u2 "zplux: please run 'zplux update' and restart your shell"
     return 0
   }
 

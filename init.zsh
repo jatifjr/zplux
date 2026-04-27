@@ -1,9 +1,7 @@
 #!/usr/bin/env zsh
 # Note: This file is zsh runtime code sourced from .zshrc.
 
-if [[ -n "${_zplux_loaded:-}" ]]; then
-  return 0
-fi
+[[ -n "${_zplux_loaded:-}" ]] && return 0
 typeset -g _zplux_loaded=1
 
 if [[ -z "${ZPLUX_HOME:-}" ]]; then
@@ -11,18 +9,11 @@ if [[ -z "${ZPLUX_HOME:-}" ]]; then
   return 1
 fi
 
-typeset -g _zplux_root="${ZPLUX_HOME}"
-typeset -g _zplux_comp_dir="${_zplux_root}/completions"
-typeset -g _zplux_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zplux"
-typeset -g _zplux_compdump="${_zplux_cache}/.zcompdump"
+source "${ZPLUX_HOME}/lib/core/env.zsh"
+source "${ZPLUX_HOME}/lib/core/usage.zsh"
+source "${ZPLUX_HOME}/lib/core/dispatch.zsh"
+source "${ZPLUX_HOME}/lib/core/runtime.zsh"
 
-source "${_zplux_root}/lib/runtime.zsh"
-source "${_zplux_root}/lib/git.zsh"
-source "${_zplux_root}/lib/update.zsh"
-source "${_zplux_root}/lib/upgrade.zsh"
-
-# Public command surface uses kebab-case consistently.
-eval 'zplux-update() { _zplux_update_run "$@"; }'
-eval 'zplux-upgrade() { _zplux_upgrade_run "$@"; }'
+zplux() { _zplux_dispatch "$@"; }
 
 zplux_init

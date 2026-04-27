@@ -8,19 +8,22 @@ Minimal zsh completion bootstrap with explicit, manual upstream sync.
 - Initializes completion with `compinit`
 - Uses an XDG cache-backed `.zcompdump`
 - Compiles `.zcompdump.zwc` when stale
-- Provides public maintenance commands: `zplux-update` and `zplux-upgrade`
+- Provides public maintenance commands: `zplux update`, `zplux upgrade`, and `zplux status`
 
-Startup stays local-only. No network sync runs during shell init.
+Startup stays local-only. No network sync runs during shell init. Subcommand implementations under `lib/commands/` are loaded only when you run that subcommand (lazy load).
 
 ## Project structure
 
-- `init.zsh` - thin entrypoint sourced from `.zshrc`
-- `lib/runtime.zsh` - startup-only runtime (`fpath`, `compinit`, cache build)
-- `lib/git.zsh` - shared git helpers for maintenance commands
-- `lib/update.zsh` - completions update workflow
-- `lib/upgrade.zsh` - self-upgrade workflow
-- `bin/zplux-update` - standalone completions updater
-- `bin/zplux-upgrade` - standalone self-upgrade entrypoint
+- `init.zsh` - shell bootstrap sourced from `.zshrc`
+- `lib/core/env.zsh` - path globals (`_zplux_root`, completions dir, cache, compdump)
+- `lib/core/usage.zsh` - `_zplux_usage` and `_zplux_help` (per-command help)
+- `lib/core/dispatch.zsh` - `_zplux_dispatch` (routes subcommands, lazy-sources command files)
+- `lib/core/runtime.zsh` - `zplux_init` (`fpath`, `compinit`, cache compile)
+- `lib/helpers/git.zsh` - shared git helpers
+- `lib/commands/update.zsh` - completions update workflow
+- `lib/commands/upgrade.zsh` - self-upgrade workflow
+- `lib/commands/status.zsh` - local diagnostics (no network)
+- `bin/zplux` - standalone CLI (same dispatch as the shell function)
 - `completions/` - mirrored upstream completion files
 - `tests/verify.sh` - lightweight behavior checks
 
@@ -46,9 +49,11 @@ source "$ZPLUX_HOME/init.zsh"
 When sourced, `init.zsh`:
 
 1. Validates `ZPLUX_HOME`
-2. Loads runtime and maintenance libraries from `lib/`
-3. Exposes `zplux-update` and `zplux-upgrade`
+2. Loads core modules (`env`, `usage`, `dispatch`, `runtime`) from `lib/core/`
+3. Exposes `zplux` with `update`, `upgrade`, `status`, and `help` entry points
 4. Runs `zplux_init`
+
+`update`, `upgrade`, and `status` are not sourced until you invoke them (via `zplux <cmd>` or `bin/zplux <cmd>`).
 
 Cache location:
 
@@ -62,18 +67,28 @@ Compiled cache:
 ${XDG_CACHE_HOME:-$HOME/.cache}/zplux/.zcompdump.zwc
 ```
 
-## Updating completions
+## Commands
+
+Overview:
+
+```zsh
+zplux              # or: zplux help
+zplux help update  # per-command description
+zplux update --help # same as help update
+```
+
+### Updating completions
 
 After sourcing `init.zsh`, run:
 
 ```zsh
-zplux-update
+zplux update
 ```
 
-Standalone updater (works even if shell function is not loaded):
+Standalone:
 
 ```zsh
-"$ZPLUX_HOME/bin/zplux-update"
+"$ZPLUX_HOME/bin/zplux" update
 ```
 
 Update flow:
@@ -85,23 +100,21 @@ Update flow:
 5. Exports upstream `src` into a temporary directory and atomically replaces local `completions/`
 6. Cleans temporary artifacts and invalidates local compdump cache files
 
-If `completions/` is missing during startup, zplux prints a warning and suggests running `zplux-update`.
+If `completions/` is missing during startup, zplux prints a warning and suggests running `zplux update`.
 
-## Upgrading zplux itself
-
-To force-sync this cloned repository to `origin/main`, run:
+### Upgrading zplux itself
 
 ```zsh
-zplux-upgrade
+zplux upgrade
 ```
 
-Standalone entrypoint:
+Standalone:
 
 ```zsh
-"$ZPLUX_HOME/bin/zplux-upgrade"
+"$ZPLUX_HOME/bin/zplux" upgrade
 ```
 
-`zplux-upgrade` behavior:
+`zplux upgrade` behavior:
 
 1. Requires `origin` remote and fetches `origin/main`
 2. Force-checkouts local `main` from `origin/main`
@@ -109,6 +122,15 @@ Standalone entrypoint:
 4. Cleans untracked files
 
 Warning: this command is intentionally destructive for local modifications. It discards local tracked changes and removes untracked files.
+
+### Status
+
+Prints `ZPLUX_HOME`, completions directory summary, cache/compdump paths, optional git short HEAD (clean/dirty), and the upstream completions tree stamp when present. No network access.
+
+```zsh
+zplux status
+"$ZPLUX_HOME/bin/zplux" status
+```
 
 ## Upstream mirror policy
 
@@ -130,7 +152,12 @@ Current checks cover:
 
 - expected failure when `ZPLUX_HOME` is missing
 - successful load with `ZPLUX_HOME` set
-- `zplux-update` and `zplux-upgrade` command exposure
+- `zplux` shell function exposure
+- `bin/zplux` usage with no arguments
+- `bin/zplux help update` and `bin/zplux update --help`
+- `bin/zplux status` with a temporary `ZPLUX_HOME`
 - startup warning when `completions/` is missing
 
-If your repo does not track `completions/` yet (for example, clean clone with `completions/` excluded), running `zplux-update` will initialize it automatically.
+If your repo does not track `completions/` yet (for example, clean clone with `completions/` excluded), running `zplux update` will initialize it automatically.
+
+Versioning for this project is not exposed via zplux; use `git` in your checkout as usual.
